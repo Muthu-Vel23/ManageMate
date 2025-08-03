@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Rewards - ManagerMate{% endblock %}
+{% block page_title %}Rewards & Gamification{% endblock %}
+
+{% block content %}
+<div class="gamification-container">
+    <!-- User Level Section -->
+    <div class="level-section">
+        <div class="level-card">
+            <div class="level-info">
+                <h2>Level {{ level }}</h2>
+                <p>{{ total_points }} Total Points</p>
+            </div>
+            
+            <div class="level-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ ((total_points % 100) / 100 * 100) }}%"></div>
+                </div>
+                <p>{{ points_to_next_level }} points to next level</p>
+            </div>
+            
+            <div class="level-badge">
+                <i class="fas fa-medal"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badges Section -->
+    <div class="badges-section">
+        <h3>Your Badges</h3>
+        <div class="badges-grid">
+            {% if total_points >= 10 %}
+            <div class="badge earned">
+                <i class="fas fa-star"></i>
+                <span>First Steps</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points >= 50 %}
+            <div class="badge earned">
+                <i class="fas fa-fire"></i>
+                <span>Getting Hot</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points >= 100 %}
+            <div class="badge earned">
+                <i class="fas fa-rocket"></i>
+                <span>Productivity Pro</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points >= 250 %}
+            <div class="badge earned">
+                <i class="fas fa-crown"></i>
+                <span>Achievement King</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points >= 500 %}
+            <div class="badge earned">
+                <i class="fas fa-trophy"></i>
+                <span>Master Achiever</span>
+            </div>
+            {% endif %}
+            
+            <!-- Locked badges -->
+            {% if total_points < 50 %}
+            <div class="badge locked">
+                <i class="fas fa-fire"></i>
+                <span>Getting Hot</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points < 100 %}
+            <div class="badge locked">
+                <i class="fas fa-rocket"></i>
+                <span>Productivity Pro</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points < 250 %}
+            <div class="badge locked">
+                <i class="fas fa-crown"></i>
+                <span>Achievement King</span>
+            </div>
+            {% endif %}
+            
+            {% if total_points < 500 %}
+            <div class="badge locked">
+                <i class="fas fa-trophy"></i>
+                <span>Master Achiever</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Rewards -->
+    <div class="rewards-section">
+        <h3>Recent Rewards</h3>
+        <div class="rewards-list">
+            {% for reward in rewards %}
+            <div class="reward-item">
+                <div class="reward-icon">
+                    {% if reward.type == 'project' %}
+                        <i class="fas fa-project-diagram"></i>
+                    {% elif reward.type == 'task' %}
+                        <i class="fas fa-tasks"></i>
+                    {% elif reward.type == 'goal' %}
+                        <i class="fas fa-bullseye"></i>
+                    {% else %}
+                        <i class="fas fa-star"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="reward-content">
+                    <h4>{{ reward.title }}</h4>
+                    <p>{{ reward.description }}</p>
+                    <span class="reward-points">+{{ reward.points }} points</span>
+                </div>
+                
+                <div class="reward-date">
+                    {{ reward.earned_at[:10] }}
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if not rewards %}
+            <div class="empty-state">
+                <i class="fas fa-gift"></i>
+                <h3>No Rewards Yet</h3>
+                <p>Complete projects, tasks, and goals to earn rewards!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

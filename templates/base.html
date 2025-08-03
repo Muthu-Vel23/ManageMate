@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ManagerMate{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        {% if session.user_id %}
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-briefcase"></i> ManagerMate</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a></li>
+                <li><a href="{{ url_for('profile') }}" class="{% if request.endpoint == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user"></i> Profile
+                </a></li>
+                <li><a href="{{ url_for('projects') }}" class="{% if request.endpoint == 'projects' %}active{% endif %}">
+                    <i class="fas fa-project-diagram"></i> Projects
+                </a></li>
+                <li><a href="{{ url_for('tasks') }}" class="{% if request.endpoint == 'tasks' %}active{% endif %}">
+                    <i class="fas fa-tasks"></i> Tasks
+                </a></li>
+                <li><a href="{{ url_for('goals') }}" class="{% if request.endpoint == 'goals' %}active{% endif %}">
+                    <i class="fas fa-bullseye"></i> Goals
+                </a></li>
+                <li><a href="{{ url_for('achievements') }}" class="{% if request.endpoint == 'achievements' %}active{% endif %}">
+                    <i class="fas fa-trophy"></i> Achievements
+                </a></li>
+                <li><a href="{{ url_for('gamification') }}" class="{% if request.endpoint == 'gamification' %}active{% endif %}">
+                    <i class="fas fa-gamepad"></i> Rewards
+                </a></li>
+                <li><a href="{{ url_for('notes') }}" class="{% if request.endpoint == 'notes' %}active{% endif %}">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </a></li>
+                <li><a href="{{ url_for('settings') }}" class="{% if request.endpoint == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <a href="{{ url_for('logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </nav>
+        {% endif %}
+
+        <main class="main-content {% if not session.user_id %}full-width{% endif %}">
+            {% if session.user_id %}
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>{% block page_title %}ManagerMate{% endblock %}</h1>
+                </div>
+                <div class="header-right">
+                    <span class="user-greeting">Welcome, {{ session.user_name }}!</span>
+                </div>
+            </header>
+            {% endif %}
+
+            <div class="content-area">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">
+                                    {{ message }}
+                                    <button class="flash-close">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Auto-hide flash messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                const closeBtn = message.querySelector('.flash-close');
+                closeBtn.addEventListener('click', function() {
+                    message.style.animation = 'slideOut 0.3s ease-in-out';
+                    setTimeout(() => message.remove(), 300);
+                });
+                
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    if (message.parentNode) {
+                        message.style.animation = 'slideOut 0.3s ease-in-out';
+                        setTimeout(() => message.remove(), 300);
+                    }
+                }, 5000);
+            });
+        });
+
+        // Focus Timer functionality
+        let timerInterval;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = document.getElementById('timer-display');
+            if (display) {
+                display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        alert('Focus session completed! Take a break.');
+                        timeLeft = 25 * 60; // Reset timer
+                        updateTimerDisplay();
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = 25 * 60;
+            updateTimerDisplay();
+        }
+    </script>
+</body>
+</html>

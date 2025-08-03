@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Achievements - ManagerMate{% endblock %}
+{% block page_title %}Achievements{% endblock %}
+
+{% block content %}
+<div class="achievements-container">
+    <!-- Add Achievement Form -->
+    <div class="add-form-card">
+        <h3><i class="fas fa-plus"></i> Add New Achievement</h3>
+        <form method="POST" enctype="multipart/form-data" class="achievement-form">
+            <div class="form-group">
+                <label for="title">Achievement Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="achievement_file">Certificate/Document</label>
+                <input type="file" id="achievement_file" name="achievement_file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Achievement
+            </button>
+        </form>
+    </div>
+
+    <!-- Achievements Gallery -->
+    <div class="achievements-gallery">
+        {% for achievement in achievements %}
+        <div class="achievement-card">
+            <div class="achievement-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            
+            <div class="achievement-content">
+                <h4>{{ achievement.title }}</h4>
+                {% if achievement.description %}
+                <p>{{ achievement.description }}</p>
+                {% endif %}
+                
+                <div class="achievement-date">
+                    <i class="fas fa-calendar"></i> {{ achievement.created_at[:10] }}
+                </div>
+                
+                {% if achievement.file_path %}
+                <div class="achievement-file">
+                    <a href="{{ url_for('static', filename=achievement.file_path) }}" 
+                       target="_blank" class="btn btn-outline btn-sm">
+                        <i class="fas fa-download"></i> View Document
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not achievements %}
+        <div class="empty-state">
+            <i class="fas fa-trophy"></i>
+            <h3>No Achievements Yet</h3>
+            <p>Upload your certificates and achievements to showcase your accomplishments!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

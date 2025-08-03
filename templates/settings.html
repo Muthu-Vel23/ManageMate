@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - ManagerMate{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <form method="POST" action="{{ url_for('update_settings') }}" class="settings-form" id="settings-form">
+        <div class="settings-sections">
+            <!-- Theme Settings -->
+            <div class="settings-card">
+                <h3><i class="fas fa-palette"></i> Theme Settings</h3>
+                <div class="setting-item">
+                    <label for="theme-select">Choose Theme</label>
+                    <select id="theme-select" name="theme" onchange="changeTheme(this.value)">
+                        <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light Theme</option>
+                        <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark Theme</option>
+                        <option value="blue" {% if settings.theme == 'blue' %}selected{% endif %}>Blue Theme</option>
+                        <option value="green" {% if settings.theme == 'green' %}selected{% endif %}>Green Theme</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-card">
+                <h3><i class="fas fa-bell"></i> Notification Settings</h3>
+                <div class="setting-item">
+                    <label class="toggle-label">
+                        <input type="checkbox" name="email_notifications" id="email-notifications" 
+                               {% if settings.email_notifications %}checked{% endif %}
+                               onchange="toggleChanged('email-notifications')">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Email Notifications</span>
+                    </label>
+                    <small class="form-help">Receive email alerts for overdue projects and tasks</small>
+                </div>
+                <div class="setting-item">
+                    <label class="toggle-label">
+                        <input type="checkbox" name="deadline_reminders" id="deadline-reminders" 
+                               {% if settings.deadline_reminders %}checked{% endif %}
+                               onchange="toggleChanged('deadline-reminders')">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Deadline Reminders</span>
+                    </label>
+                    <small class="form-help">Get notified when deadlines are approaching</small>
+                </div>
+                <div class="setting-item">
+                    <label class="toggle-label">
+                        <input type="checkbox" name="achievement_alerts" id="achievement-alerts" 
+                               {% if settings.achievement_alerts %}checked{% endif %}
+                               onchange="toggleChanged('achievement-alerts')">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Achievement Alerts</span>
+                    </label>
+                    <small class="form-help">Celebrate your accomplishments with notifications</small>
+                </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="settings-card">
+                <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
+                <div class="setting-item">
+                    <a href="{{ url_for('change_password') }}" class="btn btn-outline">
+                        <i class="fas fa-key"></i> Change Password
+                    </a>
+                </div>
+                <div class="setting-item">
+                    <a href="{{ url_for('export_data') }}" class="btn btn-outline" id="export-btn">
+                        <i class="fas fa-download"></i> Export Data
+                    </a>
+                </div>
+                <div class="setting-item">
+                    <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">
+                        <i class="fas fa-trash"></i> Delete Account
+                    </button>
+                </div>
+            </div>
+
+            <!-- Save Settings Button -->
+            <div class="settings-card">
+                <div class="setting-item">
+                    <button type="submit" class="btn btn-primary btn-full" id="save-btn">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+let settingsChanged = false;
+
+function changeTheme(theme) {
+    document.body.className = theme + '-theme';
+    localStorage.setItem('theme', theme);
+    settingsChanged = true;
+    updateSaveButton();
+}
+
+function toggleChanged(toggleId) {
+    settingsChanged = true;
+    updateSaveButton();
+    
+    // Visual feedback
+    const toggle = document.getElementById(toggleId);
+    const label = toggle.closest('.toggle-label');
+    
+    if (toggle.checked) {
+        label.style.opacity = '1';
+    } else {
+        label.style.opacity = '0.7';
+    }
+}
+
+function updateSaveButton() {
+    const saveBtn = document.getElementById('save-btn');
+    if (settingsChanged) {
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        saveBtn.classList.add('btn-warning');
+        saveBtn.classList.remove('btn-primary');
+    } else {
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+        saveBtn.classList.add('btn-primary');
+        saveBtn.classList.remove('btn-warning');
+    }
+}
+
+function confirmDeleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        // Implement delete account functionality
+        alert('Delete account functionality would be implemented here');
+    }
+}
+
+// Export data with loading state
+document.getElementById('export-btn').addEventListener('click', function(e) {
+    const originalText = this.innerHTML;
+    const loadingText = '<i class="fas fa-spinner fa-spin"></i> Exporting your data...';
+    
+    this.innerHTML = loadingText;
+    this.disabled = true;
+    
+    // Re-enable after a short delay (the download will start)
+    setTimeout(() => {
+        this.innerHTML = originalText;
+        this.disabled = false;
+    }, 2000);
+});
+
+// Form submission handling
+document.getElementById('settings-form').addEventListener('submit', function(e) {
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    saveBtn.disabled = true;
+});
+
+// Load saved theme and initialize
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || '{{ settings.theme }}';
+    
+    document.getElementById('theme-select').value = savedTheme;
+    changeTheme(savedTheme);
+    
+    // Reset settings changed flag after initial load
+    setTimeout(() => {
+        settingsChanged = false;
+        updateSaveButton();
+    }, 100);
+    
+    // Add change listeners to all form elements
+    const formElements = document.querySelectorAll('#settings-form input, #settings-form select');
+    formElements.forEach(element => {
+        if (element.type !== 'checkbox') {
+            element.addEventListener('change', () => {
+                settingsChanged = true;
+                updateSaveButton();
+            });
+        }
+    });
+});
+
+// Show success message if redirected with success parameter
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('saved') === 'true') {
+    // Create and show flash message
+    const flashDiv = document.createElement('div');
+    flashDiv.className = 'flash-message flash-success';
+    flashDiv.innerHTML = 'Settings saved successfully! <button class="flash-close">&times;</button>';
+    
+    const flashContainer = document.querySelector('.flash-messages') || 
+                          document.createElement('div');
+    if (!document.querySelector('.flash-messages')) {
+        flashContainer.className = 'flash-messages';
+        document.body.appendChild(flashContainer);
+    }
+    
+    flashContainer.appendChild(flashDiv);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        flashDiv.remove();
+    }, 3000);
+    
+    // Add close button functionality
+    flashDiv.querySelector('.flash-close').addEventListener('click', () => {
+        flashDiv.remove();
+    });
+}
+</script>
+
+{% endblock %}

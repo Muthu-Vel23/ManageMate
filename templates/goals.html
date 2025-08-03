@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Goals - ManagerMate{% endblock %}
+{% block page_title %}Goals{% endblock %}
+
+{% block content %}
+<div class="goals-container">
+    <!-- Add Goal Form -->
+    <div class="add-form-card">
+        <h3><i class="fas fa-plus"></i> Add New Goal</h3>
+        <form method="POST" class="goal-form">
+            <div class="form-group">
+                <label for="title">Goal Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="deadline">Deadline</label>
+                <input type="datetime-local" id="deadline" name="deadline">
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Goal
+            </button>
+        </form>
+    </div>
+
+    <!-- Goals Grid (Sticky Notes Style) -->
+    <div class="goals-grid">
+        {% for goal in goals %}
+        <div class="goal-sticky {% if goal.completed %}completed{% endif %}">
+            <div class="sticky-header">
+                <h4>{{ goal.title }}</h4>
+                {% if goal.completed %}
+                    <i class="fas fa-check-circle completed-icon"></i>
+                {% endif %}
+            </div>
+
+            {% if goal.description %}
+            <p class="goal-description">{{ goal.description }}</p>
+            {% endif %}
+
+            {% if goal.deadline %}
+            <div class="goal-deadline">
+                <i class="fas fa-calendar"></i> {{ goal.deadline[:16] }}
+            </div>
+            {% endif %}
+
+            {% if not goal.completed %}
+            <div class="goal-actions">
+                <a href="{{ url_for('complete_goal', goal_id=goal.id) }}" 
+                   class="btn btn-success btn-sm"
+                   onclick="return confirm('Mark this goal as achieved?')">
+                    <i class="fas fa-trophy"></i> Achieve
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {% if not goals %}
+        <div class="empty-state">
+            <i class="fas fa-bullseye"></i>
+            <h3>No Goals Yet</h3>
+            <p>Set your first goal to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Notes - ManagerMate{% endblock %}
+{% block page_title %}My Notes{% endblock %}
+
+{% block content %}
+<div class="notes-container">
+    <!-- Add Note Form -->
+    <div class="add-form-card">
+        <h3><i class="fas fa-plus"></i> Add New Note</h3>
+        <form method="POST" class="note-form">
+            <div class="form-group">
+                <label for="title">Note Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea id="content" name="content" rows="6" placeholder="Write your note here..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Note
+            </button>
+        </form>
+    </div>
+
+    <!-- Notes Grid -->
+    <div class="notes-grid">
+        {% for note in notes %}
+        <div class="note-card">
+            <div class="note-header">
+                <h4>{{ note.title }}</h4>
+                <span class="note-date">{{ note.created_at[:10] }}</span>
+            </div>
+            
+            <div class="note-content">
+                <p>{{ note.content[:200] }}{% if note.content|length > 200 %}...{% endif %}</p>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not notes %}
+        <div class="empty-state">
+            <i class="fas fa-sticky-note"></i>
+            <h3>No Notes Yet</h3>
+            <p>Start taking notes to keep track of your thoughts and ideas!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
